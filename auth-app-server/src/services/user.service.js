@@ -3,6 +3,18 @@ import { User } from '../models/user.js'
 import { ApiError } from '../exceptions/api.error.js';
 import { emailService } from './email.service.js';
 
+function getAllActivated() {
+  return User.findAll({
+    where: {
+      activationToken: null,
+    },
+  });
+}
+
+function normalize({ id, email }) {
+  return { id, email };
+}
+
 function findByEmail(email) {
   return User.findOne({ where: { email } });
 }
@@ -32,5 +44,8 @@ async function register(name, email, password) {
 }
 
 export const userService = {
+  getAllActivated,
+  normalize,
+  findByEmail,
   register,
 };
