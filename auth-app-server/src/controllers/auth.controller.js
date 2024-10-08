@@ -5,11 +5,12 @@ import { userService } from '../services/user.service.js';
 import { jwtService } from '../services/jwt.service.js';
 import { ApiError } from '../exceptions/api.error.js';
 import { tokenService } from '../services/token.service.js';
+import { emailService } from '../services/email.service.js';
 
 function validateName(value) {
   if (!value) {
     return 'Name is required';
-  } 
+  }
 
   if (value.length < 2) {
     return 'Name must be at least 2 characters long';
@@ -32,7 +33,7 @@ function validatePassword(value) {
   if (!value) {
     return 'Password is required';
   }
-    
+
   if (value.length < 6) {
     return 'At least 6 characters';
   }
@@ -123,7 +124,7 @@ const refresh = async (req, res) => {
   }
 
   const user = await userService.findByEmail(userData.email);
-  
+
   await generateTokens(res, userData);
 };
 
@@ -140,10 +141,44 @@ const logout = async (req, res) => {
   res.sendStatus(204);
 };
 
-export const authController = { 
+const requestPasswordReset = async (req, res) => {
+  const { email } = req.body;
+
+  const errors = {
+    email: validateEmail(email),
+  }
+
+  if (errors.email) {
+    throw ApiError.badRequest('Bad request', errors);
+  }
+
+  await userService.initiatePasswordReset(email);
+
+  res.status(200).json({ message: 'If an account with that email exists, a password reset link has been sent.' });
+};
+
+const resetPassword = async (req, res) => {
+  const { token, password } = req.body;
+
+  const errors = {
+    password: validatePassword(password),
+  }
+
+  if (errors.password) {
+    throw ApiError.badRequest('Bad request', errors);
+  }
+
+  await userService.resetPassword(token, password);
+
+  res.status(200).json({ message: 'Password has been reset successfully' });
+};
+
+export const authController = {
   register,
   activate,
   login,
   refresh,
   logout,
+  requestPasswordReset,
+  resetPassword,
 };

@@ -3,12 +3,20 @@ import { DataTypes } from 'sequelize'
 import { User } from './user.js';
 
 export const Token = client.define(
-  'token', 
+  'token',
   {
     refreshToken: {
       type: DataTypes.STRING,
-      allowNull: false,
-    }
+      allowNull: true,
+    },
+    resetPasswordToken: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    resetPasswordExpires: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   }
 );
 
